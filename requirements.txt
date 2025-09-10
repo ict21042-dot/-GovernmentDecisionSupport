@@ -1,39 +1,34 @@
 # Core Streamlit and Web Framework
 streamlit>=1.28.0
 
-# LangChain Core and Community
+# LangChain Core and Community (compatible versions)
 langchain>=0.1.0
-langchain-community>=0.2.0
-langchain-core>=0.2.0
+langchain-community>=0.0.20
+langchain-core>=0.1.0
 
-# New LangChain Packages
-langchain-chroma>=0.1.0
-langchain-huggingface>=0.0.1
+# Vector Database (older compatible version)
+chromadb==0.4.15
+
+# HuggingFace for embeddings (fallback)
+sentence-transformers>=2.2.0
+transformers>=4.21.0
 
 # Google AI Integration (optional)
 langchain-google-genai>=1.0.0
-
-# Vector Database and Storage
-chromadb>=0.4.0
 
 # Document Processing
 pypdf>=3.17.0
 python-dotenv>=1.0.0
 
-# Data Processing (keep existing versions)
+# Data Processing
 pandas>=1.5.0
 numpy>=1.24.0
 
-# AI and ML (keep existing versions to save disk space)
-sentence-transformers>=2.2.0
-transformers>=4.21.0
-
 # Core utilities
 tiktoken>=0.5.0
-huggingface-hub>=0.16.0
 
-# Optional: For enhanced text processing (lightweight)
+# Alternative: Use FAISS for vector store (SQLite-free)
+faiss-cpu>=1.7.4
+
+# Optional: For enhanced text processing
 beautifulsoup4>=4.11.0
-
-# Development tools (optional)
-pytest>=7.0.0

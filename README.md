@@ -76,14 +76,17 @@ mkdir data
 
 ### Running the Application
 ```bash
-# Standard version
-streamlit run app_multilang.py
+# For local development (includes both Chroma and FAISS)
+streamlit run app_free_improved.py
 
-# Quota-managed version (recommended for production)
-streamlit run app_quota_managed.py
+# For Streamlit Cloud deployment (FAISS only, no SQLite dependency)
+streamlit run streamlit_app.py
+
+# Standard version (local only)
+streamlit run app_multilang.py
 ```
 
-**⚠️ API Quota Issues?** If you encounter "429 quota exceeded" errors, use the quota-managed version which includes local embedding fallbacks. See [QUOTA_MANAGEMENT_GUIDE.md](QUOTA_MANAGEMENT_GUIDE.md) for details.
+**⚠️ Streamlit Cloud SQLite Issue?** Use `streamlit_app.py` which is specifically designed for Streamlit Cloud with FAISS vector store (no SQLite dependency). Other apps may fail due to Streamlit Cloud's older SQLite version.
 
 ## 📋 Prompt Strategy
 

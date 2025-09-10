@@ -20,17 +20,17 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader, TextLoader, CSVLoader
 from langchain.schema import Document
 
-# Vector store - use FAISS for Streamlit Cloud compatibility
+# Vector store - FAISS ONLY for Streamlit Cloud (no SQLite dependency)
 try:
     from langchain_community.vectorstores import FAISS
     VECTOR_STORE_TYPE = "FAISS"
+    FAISS_AVAILABLE = True
 except ImportError:
-    try:
-        from langchain_community.vectorstores import Chroma
-        VECTOR_STORE_TYPE = "Chroma"
-    except ImportError:
-        st.error("❌ No compatible vector store found. Please install faiss-cpu or chromadb.")
-        st.stop()
+    FAISS_AVAILABLE = False
+    st.error("❌ FAISS not available. Please install faiss-cpu for Streamlit Cloud compatibility.")
+    st.stop()
+
+# DO NOT use Chroma on Streamlit Cloud due to SQLite version conflicts
 
 # Embeddings - prefer sentence-transformers for Streamlit Cloud
 try:
@@ -283,8 +283,8 @@ def build_vector_store(embedding_choice: str):
             if not embeddings.model:
                 return None
             
-            # Create vector store
-            if VECTOR_STORE_TYPE == "FAISS":
+            # Create vector store - FAISS only for Streamlit Cloud compatibility
+            if VECTOR_STORE_TYPE == "FAISS" and FAISS_AVAILABLE:
                 vectorstore = FAISS.from_documents(chunks, embeddings)
                 # Save to disk if possible
                 try:
@@ -293,9 +293,8 @@ def build_vector_store(embedding_choice: str):
                 except Exception as e:
                     st.warning(f"⚠️ Could not save vector store: {str(e)}")
             else:
-                # Fallback to Chroma (may not work on Streamlit Cloud)
-                from langchain_community.vectorstores import Chroma
-                vectorstore = Chroma.from_documents(chunks, embeddings)
+                st.error("❌ FAISS is required for Streamlit Cloud compatibility")
+                return None
             
             st.success(f"✅ Vector store built with {len(chunks)} chunks")
             logging.info(f"Built vector store with {len(chunks)} chunks")

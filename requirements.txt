@@ -29,4 +29,7 @@ tiktoken>=0.5.0
 
 # Utilities
 beautifulsoup4>=4.11.0
-chromadb
+
+sqlite3>=3.35.0
+
+# NOTE: chromadb removed due to SQLite version conflicts on Streamlit Cloud

@@ -45,19 +45,22 @@ except ImportError:
     from langchain_community.embeddings import HuggingFaceEmbeddings
     HUGGINGFACE_NEW = False
 
-# Optional: Only import Google AI if API key is available
+# Load environment FIRST
+load_dotenv()
+
+# Optional: Only import Google AI if API key is available (AFTER loading .env)
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if GOOGLE_API_KEY:
     try:
         from langchain_google_genai import ChatGoogleGenerativeAI
         GOOGLE_AVAILABLE = True
+        print(f"✅ Google AI available with API key: {GOOGLE_API_KEY[:20]}...")
     except ImportError:
         GOOGLE_AVAILABLE = False
+        print("❌ Google AI import failed")
 else:
     GOOGLE_AVAILABLE = False
-
-# Load environment
-load_dotenv()
+    print("❌ Google API key not found")
 
 # Fix asyncio event loop issue for Streamlit
 try:

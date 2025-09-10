@@ -1,34 +1,31 @@
-# Core Streamlit and Web Framework
+# Streamlit Cloud Compatible Requirements
+# Core framework
 streamlit>=1.28.0
 
-# LangChain Core and Community (compatible versions)
-langchain>=0.1.0
+# LangChain essentials (older versions for compatibility)
+langchain>=0.1.0,<0.2.0
 langchain-community>=0.0.20
-langchain-core>=0.1.0
 
-# Vector Database (older compatible version)
-chromadb==0.4.15
+# Vector store - FAISS instead of Chroma (no SQLite dependency)
+faiss-cpu>=1.7.4
 
-# HuggingFace for embeddings (fallback)
-sentence-transformers>=2.2.0
-transformers>=4.21.0
+# Embeddings - Sentence Transformers (most reliable)
+sentence-transformers>=2.2.0,<3.0.0
+transformers>=4.21.0,<5.0.0
 
-# Google AI Integration (optional)
-langchain-google-genai>=1.0.0
-
-# Document Processing
+# Document processing
 pypdf>=3.17.0
 python-dotenv>=1.0.0
 
-# Data Processing
-pandas>=1.5.0
-numpy>=1.24.0
+# Data processing (stable versions)
+pandas>=1.5.0,<2.0.0
+numpy>=1.24.0,<2.0.0
 
-# Core utilities
+# Google AI (optional - only if API key provided)
+google-generativeai>=0.3.0
+
+# Text processing
 tiktoken>=0.5.0
 
-# Alternative: Use FAISS for vector store (SQLite-free)
-faiss-cpu>=1.7.4
-
-# Optional: For enhanced text processing
+# Utilities
 beautifulsoup4>=4.11.0

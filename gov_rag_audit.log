@@ -1,0 +1,108 @@
+2025-09-10 10:47:32,247 - INFO - Query audit: {"timestamp": "2025-09-10T10:47:32.247878", "user_session": "anonymous", "query": "hi", "language": "English", "query_length": 2}
+2025-09-10 10:47:32,253 - INFO - Loaded 1 documents from data
+2025-09-10 10:47:32,302 - ERROR - Error with vector store: There is no current event loop in thread 'ScriptRunner.scriptThread'.
+2025-09-10 10:58:21,179 - INFO - Query audit: {"timestamp": "2025-09-10T10:58:21.177838", "user_session": "anonymous", "query": "\u0db1\u0dc0 \u0d89\u0daf\u0dd2\u0d9a\u0dd2\u0dbb\u0dd3\u0db8\u0dca \u0dc0\u0dca\u200d\u0dba\u0dcf\u0db4\u0dd8\u0dad\u0dd2 \u0dc3\u0db3\u0dc4\u0dcf \u0db4\u0dbb\u0dd2\u0dc3\u0dbb \u0d85\u0db1\u0dd4\u0d9a\u0dd6\u0dbd\u0dad\u0dcf \u0d85\u0dc0\u0dc1\u0dca\u200d\u0dba\u0dad\u0dcf \u0db8\u0ddc\u0db1\u0dc0\u0dcf\u0daf?", "language": "English", "query_length": 59}
+2025-09-10 10:58:21,182 - INFO - Loaded 1 documents from data
+2025-09-10 10:58:21,225 - ERROR - Error with vector store: There is no current event loop in thread 'ScriptRunner.scriptThread'.
+2025-09-10 11:02:16,522 - INFO - Query audit: {"timestamp": "2025-09-10T11:02:16.522579", "user_session": "anonymous", "query": "hi", "language": "English", "query_length": 2}
+2025-09-10 11:02:16,524 - INFO - Loaded 1 documents from data
+2025-09-10 11:02:16,902 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-09-10 11:02:17,652 - ERROR - Error with vector store: Error embedding content: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/embed_content_free_tier_requests"
+  quota_id: "EmbedContentRequestsPerDayPerProjectPerModel-FreeTier"
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/embed_content_free_tier_requests"
+  quota_id: "EmbedContentRequestsPerDayPerUserPerProjectPerModel-FreeTier"
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/embed_content_free_tier_requests"
+  quota_id: "EmbedContentRequestsPerMinutePerUserPerProjectPerModel-FreeTier"
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/embed_content_free_tier_requests"
+  quota_id: "EmbedContentRequestsPerMinutePerProjectPerModel-FreeTier"
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+]
+2025-09-10 11:07:41,455 - INFO - Loaded 1 documents from data
+2025-09-10 11:12:12,196 - INFO - Query audit: {"timestamp": "2025-09-10T11:12:12.196044", "user_session": "anonymous", "query": "hi", "language": "English", "query_length": 2}
+2025-09-10 11:12:12,201 - INFO - Loaded 1 documents from data
+2025-09-10 11:12:12,823 - ERROR - Error with vector store: Error embedding content: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/embed_content_free_tier_requests"
+  quota_id: "EmbedContentRequestsPerDayPerProjectPerModel-FreeTier"
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/embed_content_free_tier_requests"
+  quota_id: "EmbedContentRequestsPerMinutePerProjectPerModel-FreeTier"
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/embed_content_free_tier_requests"
+  quota_id: "EmbedContentRequestsPerMinutePerUserPerProjectPerModel-FreeTier"
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/embed_content_free_tier_requests"
+  quota_id: "EmbedContentRequestsPerDayPerUserPerProjectPerModel-FreeTier"
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+]
+2025-09-10 11:12:55,169 - INFO - Loaded 1 documents from data
+2025-09-10 11:13:02,564 - INFO - Loaded 1 documents from data
+2025-09-10 11:13:09,943 - WARNING - Local multilingual model failed: Your currently installed version of Keras is Keras 3, but this is not yet supported in Transformers. Please install the backwards-compatible tf-keras package with `pip install tf-keras`.
+2025-09-10 11:13:09,943 - WARNING - Local multilingual model failed: module 'sentence_transformers' has no attribute 'SentenceTransformer'
+2025-09-10 11:13:09,949 - ERROR - All embedding models failed: Your currently installed version of Keras is Keras 3, but this is not yet supported in Transformers. Please install the backwards-compatible tf-keras package with `pip install tf-keras`.
+2025-09-10 11:13:10,492 - ERROR - All embedding models failed: Your currently installed version of Keras is Keras 3, but this is not yet supported in Transformers. Please install the backwards-compatible tf-keras package with `pip install tf-keras`.
+2025-09-10 11:17:16,768 - INFO - Loaded 1 documents from data
+2025-09-10 11:17:25,234 - ERROR - Failed to load multilingual: Your currently installed version of Keras is Keras 3, but this is not yet supported in Transformers. Please install the backwards-compatible tf-keras package with `pip install tf-keras`.
+2025-09-10 11:17:25,259 - ERROR - Failed to load english_optimized: Your currently installed version of Keras is Keras 3, but this is not yet supported in Transformers. Please install the backwards-compatible tf-keras package with `pip install tf-keras`.
+2025-09-10 11:19:02,078 - INFO - Loaded 1 documents from data
+2025-09-10 11:19:10,451 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 11:20:04,520 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 11:20:04,843 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-09-10 11:20:05,605 - INFO - Built vector store with 8 chunks using multilingual
+2025-09-10 11:20:05,685 - ERROR - Query processing failed: Missing some input keys: {'query'}
+2025-09-10 11:23:01,116 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 11:23:07,549 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 11:27:11,521 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 11:27:17,557 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 11:27:17,961 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-09-10 11:27:18,242 - ERROR - Query processing failed: Missing some input keys: {'query'}
+2025-09-10 11:29:25,251 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 11:29:31,715 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 11:29:31,740 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-09-10 11:29:32,127 - ERROR - Query processing failed: Missing some input keys: {'query'}
+2025-09-10 11:32:20,642 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 11:32:27,083 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 11:32:27,109 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-09-10 11:32:28,131 - WARNING - Retrying langchain_google_genai.chat_models._chat_with_retry.<locals>._chat_with_retry in 2.0 seconds as it raised NotFound: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods..
+2025-09-10 11:32:30,421 - WARNING - Retrying langchain_google_genai.chat_models._chat_with_retry.<locals>._chat_with_retry in 4.0 seconds as it raised NotFound: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods..
+2025-09-10 11:32:34,715 - WARNING - Retrying langchain_google_genai.chat_models._chat_with_retry.<locals>._chat_with_retry in 8.0 seconds as it raised NotFound: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods..
+2025-09-10 11:32:43,014 - WARNING - Retrying langchain_google_genai.chat_models._chat_with_retry.<locals>._chat_with_retry in 16.0 seconds as it raised NotFound: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods..
+2025-09-10 11:32:59,321 - WARNING - Retrying langchain_google_genai.chat_models._chat_with_retry.<locals>._chat_with_retry in 32.0 seconds as it raised NotFound: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods..
+2025-09-10 11:33:31,641 - ERROR - Query processing failed: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-10 11:37:08,187 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 11:37:14,518 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 11:37:14,562 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-09-10 11:45:57,543 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 11:46:03,608 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 11:46:03,653 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-09-10 12:10:18,877 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 12:10:36,076 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 12:10:36,126 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-09-10 12:10:47,308 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 12:10:52,623 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 12:12:32,365 - INFO - Loaded 154 documents from data
+2025-09-10 12:12:32,391 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 12:12:37,794 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 12:12:52,880 - ERROR - Vector store creation failed: Query error: Database error: error returned from database: (code: 1032) attempt to write a readonly database
+2025-09-10 12:13:07,539 - INFO - Loaded 154 documents from data
+2025-09-10 12:13:07,564 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 12:13:12,981 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 12:13:27,147 - ERROR - Vector store creation failed: Query error: Database error: error returned from database: (code: 1032) attempt to write a readonly database
+2025-09-10 12:13:27,152 - ERROR - Query processing failed: 'NoneType' object has no attribute 'get_relevant_documents'

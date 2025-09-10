@@ -1,0 +1,168 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gov-rag-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-keys
+  namespace: gov-rag-system
+type: Opaque
+stringData:
+  google-api-key: "your_gemini_api_key_here"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gov-rag-config
+  namespace: gov-rag-system
+data:
+  DOMAIN: "Local Government Planning and Decision Making"
+  VECTOR_DB_TYPE: "chroma"
+  LLM_MODEL: "gemini-pro"
+  LLM_TEMPERATURE: "0.1"
+  DEFAULT_LANGUAGE: "English"
+  SUPPORTED_LANGUAGES: "English,Sinhala,Tamil"
+  AUDIT_LOGGING: "true"
+  CHUNK_SIZE: "1200"
+  CHUNK_OVERLAP: "300"
+  RETRIEVAL_K: "6"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gov-rag-data-pvc
+  namespace: gov-rag-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gov-rag-vector-pvc
+  namespace: gov-rag-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gov-rag-deployment
+  namespace: gov-rag-system
+  labels:
+    app: gov-rag
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gov-rag
+  template:
+    metadata:
+      labels:
+        app: gov-rag
+    spec:
+      containers:
+      - name: gov-rag
+        image: gov-rag:latest
+        ports:
+        - containerPort: 8501
+        env:
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: google-api-key
+        envFrom:
+        - configMapRef:
+            name: gov-rag-config
+        volumeMounts:
+        - name: data-storage
+          mountPath: /app/data
+        - name: vector-storage
+          mountPath: /app/vector_store
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /_stcore/health
+            port: 8501
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /_stcore/health
+            port: 8501
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: data-storage
+        persistentVolumeClaim:
+          claimName: gov-rag-data-pvc
+      - name: vector-storage
+        persistentVolumeClaim:
+          claimName: gov-rag-vector-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gov-rag-service
+  namespace: gov-rag-system
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8501
+    protocol: TCP
+  selector:
+    app: gov-rag
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gov-rag-ingress
+  namespace: gov-rag-system
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - gov-rag.yourdomain.com
+    secretName: gov-rag-tls
+  rules:
+  - host: gov-rag.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gov-rag-service
+            port:
+              number: 80
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gov-rag-pdb
+  namespace: gov-rag-system
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: gov-rag

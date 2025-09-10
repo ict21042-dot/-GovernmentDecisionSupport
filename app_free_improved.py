@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 import json
 import asyncio
+import toml
 from typing import List, Dict, Any, Optional
 
 # Suppress TensorFlow and matplotlib warnings for cleaner output
@@ -48,8 +49,64 @@ except ImportError:
 # Load environment FIRST
 load_dotenv()
 
-# Optional: Only import Google AI if API key is available (AFTER loading .env)
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+# Load TOML configuration with fallbacks
+def load_config() -> Dict[str, Any]:
+    """Load configuration from TOML file with fallback to .env and defaults"""
+    config = {}
+    
+    # Try to load TOML config first
+    if os.path.exists("config.toml"):
+        try:
+            config = toml.load("config.toml")
+            print("✅ Loaded configuration from config.toml")
+        except Exception as e:
+            print(f"⚠️ Could not load config.toml: {e}")
+    
+    # Fallback to defaults if TOML not available
+    if not config:
+        config = {
+            "api": {"GOOGLE_API_KEY": ""},
+            "system": {
+                "data_dir": "data",
+                "vector_dir": "vector_store",
+                "domain": "Local Government Planning and Decision Making"
+            },
+            "embeddings": {
+                "default_model": "multilingual",
+                "batch_size": 16,
+                "normalize_embeddings": True
+            },
+            "vector_store": {
+                "chunk_size": 1000,
+                "chunk_overlap": 200,
+                "search_k": 5,
+                "fetch_k": 15,
+                "lambda_mult": 0.7
+            },
+            "llm": {
+                "model": "gemini-2.0-flash",
+                "temperature": 0.1
+            },
+            "logging": {
+                "level": "INFO",
+                "audit_file": "gov_rag_audit.log"
+            }
+        }
+        print("📄 Using default configuration")
+    
+    # Environment variable override (highest priority)
+    env_api_key = os.getenv("GOOGLE_API_KEY")
+    if env_api_key:
+        config["api"]["GOOGLE_API_KEY"] = env_api_key
+        print("🔧 Google API key overridden from environment")
+    
+    return config
+
+# Load configuration
+CONFIG = load_config()
+
+# Optional: Only import Google AI if API key is available (AFTER loading config)
+GOOGLE_API_KEY = CONFIG.get("api", {}).get("GOOGLE_API_KEY", "")
 if GOOGLE_API_KEY:
     try:
         from langchain_google_genai import ChatGoogleGenerativeAI
@@ -68,22 +125,28 @@ try:
 except RuntimeError:
     asyncio.set_event_loop(asyncio.new_event_loop())
 
-# Configure logging for audit trail
+# Configure logging for audit trail using TOML config
+log_config = CONFIG.get("logging", {})
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, log_config.get("level", "INFO")),
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('gov_rag_audit.log'),
+        logging.FileHandler(log_config.get("audit_file", "gov_rag_audit.log")),
         logging.StreamHandler()
     ]
 )
 
-# --- Free-Only Configuration ---
-DATA_DIR = "data"
-VECTOR_DIR = "vector_store"
-SUPPORTED_LANGUAGES = ["English", "Sinhala", "Tamil"]
-DOMAIN = "Local Government Planning and Decision Making"
-DATA_TYPES = ["PDFs", "TXT", "Markdown", "CSV", "Meeting Minutes", "Reports"]
+# --- Configuration from TOML ---
+system_config = CONFIG.get("system", {})
+DATA_DIR = system_config.get("data_dir", "data")
+VECTOR_DIR = system_config.get("vector_dir", "vector_store")
+DOMAIN = system_config.get("domain", "Local Government Planning and Decision Making")
+
+# Languages and document types from config
+lang_config = CONFIG.get("languages", {})
+doc_config = CONFIG.get("document_types", {})
+SUPPORTED_LANGUAGES = lang_config.get("supported", ["English", "Sinhala", "Tamil"])
+DATA_TYPES = doc_config.get("supported", ["PDFs", "TXT", "Markdown", "CSV", "Meeting Minutes", "Reports"])
 
 # Free embedding models (no API required)
 FREE_EMBEDDING_OPTIONS = {
@@ -149,15 +212,16 @@ class FreeEmbeddingManager:
         self.model_cache = {}
         
     def get_embedding_model(self, model_choice: str = "multilingual"):
-        """Get free embedding model using latest HuggingFace package"""
+        """Get free embedding model using latest HuggingFace package with TOML config"""
         
         if model_choice in self.model_cache:
             return self.model_cache[model_choice], model_choice
         
         try:
             model_config = FREE_EMBEDDING_OPTIONS[model_choice]
+            embed_config = CONFIG.get("embeddings", {})
             
-            # Initialize HuggingFace embedding model with latest package
+            # Initialize HuggingFace embedding model with TOML config
             embeddings = HuggingFaceEmbeddings(
                 model_name=model_config["model"],
                 model_kwargs={
@@ -165,8 +229,8 @@ class FreeEmbeddingManager:
                     'trust_remote_code': False  # Security best practice
                 },
                 encode_kwargs={
-                    'normalize_embeddings': True,
-                    'batch_size': 16  # Reduced for stability
+                    'normalize_embeddings': embed_config.get('normalize_embeddings', True),
+                    'batch_size': embed_config.get('batch_size', 16)  # From TOML config
                 }
             )
             
@@ -257,10 +321,13 @@ def build_vector_store(embedding_choice: str = "multilingual"):
         st.warning("No documents found to build vector store.")
         return None, None
     
-    # Optimized text splitter
+    # Get vector store config from TOML
+    vs_config = CONFIG.get("vector_store", {})
+    
+    # Optimized text splitter using TOML config
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200,
+        chunk_size=vs_config.get("chunk_size", 1000),
+        chunk_overlap=vs_config.get("chunk_overlap", 200),
         separators=["\n\n", "\n", ".", "!", "?", ";", ":", " ", ""]
     )
     
@@ -441,22 +508,24 @@ def get_free_rag_chain(embedding_choice: str = "multilingual"):
     if not vectorstore:
         return None, None, False
     
-    # Enhanced retriever
+    # Enhanced retriever using TOML config
+    vs_config = CONFIG.get("vector_store", {})
     retriever = vectorstore.as_retriever(
         search_type="mmr",
         search_kwargs={
-            "k": 5,
-            "fetch_k": 15,
-            "lambda_mult": 0.7
+            "k": vs_config.get("search_k", 5),
+            "fetch_k": vs_config.get("fetch_k", 15),
+            "lambda_mult": vs_config.get("lambda_mult", 0.7)
         }
     )
     
     # Use Google LLM only if API key is available, otherwise provide documents for manual review
     if GOOGLE_AVAILABLE and GOOGLE_API_KEY:
         try:
+            llm_config = CONFIG.get("llm", {})
             llm = ChatGoogleGenerativeAI(
-                model="gemini-2.0-flash", 
-                temperature=0.1,
+                model=llm_config.get("model", "gemini-2.0-flash"), 
+                temperature=llm_config.get("temperature", 0.1),
                 google_api_key=GOOGLE_API_KEY
             )
             
@@ -550,14 +619,33 @@ def main():
     
     # Sidebar for configuration
     with st.sidebar:
-        st.header("⚙️ Free Model Configuration")
+        st.header("⚙️ Configuration")
+        
+        # Display TOML config status
+        if os.path.exists("config.toml"):
+            st.success("✅ TOML Config Loaded")
+        else:
+            st.info("📄 Using Default Config")
+        
+        # Show key configuration values
+        with st.expander("📋 Current Config"):
+            st.json({
+                "API": {"has_key": bool(GOOGLE_API_KEY)},
+                "System": CONFIG.get("system", {}),
+                "Embeddings": CONFIG.get("embeddings", {}),
+                "Vector Store": CONFIG.get("vector_store", {}),
+                "LLM": CONFIG.get("llm", {})
+            })
+        
+        st.header("🧠 Free Model Configuration")
         
         # Embedding model selection
         st.subheader("🧠 Embedding Model (Free)")
+        default_model = CONFIG.get("embeddings", {}).get("default_model", "multilingual")
         embedding_choice = st.selectbox(
             "Choose free embedding model:",
             list(FREE_EMBEDDING_OPTIONS.keys()),
-            index=0,  # Default to multilingual
+            index=list(FREE_EMBEDDING_OPTIONS.keys()).index(default_model) if default_model in FREE_EMBEDDING_OPTIONS else 0,
             format_func=lambda x: FREE_EMBEDDING_OPTIONS[x]["name"]
         )
         

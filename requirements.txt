@@ -30,6 +30,5 @@ tiktoken>=0.5.0
 # Utilities
 beautifulsoup4>=4.11.0
 
-chromadb
 # NOTE: chromadb removed due to SQLite version conflicts on Streamlit Cloud
 # NOTE: sqlite3 is a built-in Python module and doesn't need to be installed

@@ -110,7 +110,8 @@ def load_config() -> Dict[str, Any]:
 CONFIG = load_config()
 
 # Optional: Only import Google AI if API key is available (AFTER loading config)
-GOOGLE_API_KEY = CONFIG.get("api", {}).get("GOOGLE_API_KEY", "")
+GOOGLE_API_KEY = "AIzaSyCN5w6UP1wcHg-WfiK3FGWhnL9YMVtcU9M"
+
 if GOOGLE_API_KEY:
     try:
         from langchain_google_genai import ChatGoogleGenerativeAI

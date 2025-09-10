@@ -10,13 +10,17 @@ def load_config() -> Dict[str, Any]:
     """Load configuration from TOML file with fallback to .env"""
     config = {}
     
-    # Try to load TOML config first
-    if os.path.exists("config.toml"):
-        try:
-            config = toml.load("config.toml")
-            st.success("✅ Loaded configuration from config.toml")
-        except Exception as e:
-            st.warning(f"⚠️ Could not load config.toml: {e}")
+    # Try to load TOML config first (renamed to avoid Streamlit conflicts)
+    config_files = ["app_config.toml", "config.toml"]  # Support both names
+    
+    for config_file in config_files:
+        if os.path.exists(config_file):
+            try:
+                config = toml.load(config_file)
+                st.success(f"✅ Loaded configuration from {config_file}")
+                break
+            except Exception as e:
+                st.warning(f"⚠️ Could not load {config_file}: {e}")
     
     # Fallback to .env file
     if not config and os.path.exists(".env"):
@@ -150,7 +154,7 @@ def main():
     st.markdown("""
     ### 📋 Configuration Sources (Priority Order):
     1. **Environment Variables** (highest priority)
-    2. **config.toml** file
+    2. **app_config.toml** file (or config.toml for backward compatibility)
     3. **.env** file (fallback)
     4. **Default values** (lowest priority)
     

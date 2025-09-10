@@ -54,13 +54,17 @@ def load_config() -> Dict[str, Any]:
     """Load configuration from TOML file with fallback to .env and defaults"""
     config = {}
     
-    # Try to load TOML config first
-    if os.path.exists("config.toml"):
-        try:
-            config = toml.load("config.toml")
-            print("✅ Loaded configuration from config.toml")
-        except Exception as e:
-            print(f"⚠️ Could not load config.toml: {e}")
+    # Try to load TOML config first (renamed to avoid Streamlit conflicts)
+    config_files = ["app_config.toml", "config.toml"]  # Support both names
+    
+    for config_file in config_files:
+        if os.path.exists(config_file):
+            try:
+                config = toml.load(config_file)
+                print(f"✅ Loaded configuration from {config_file}")
+                break
+            except Exception as e:
+                print(f"⚠️ Could not load {config_file}: {e}")
     
     # Fallback to defaults if TOML not available
     if not config:
@@ -622,8 +626,10 @@ def main():
         st.header("⚙️ Configuration")
         
         # Display TOML config status
-        if os.path.exists("config.toml"):
-            st.success("✅ TOML Config Loaded")
+        config_file_found = os.path.exists("app_config.toml") or os.path.exists("config.toml")
+        if config_file_found:
+            config_file = "app_config.toml" if os.path.exists("app_config.toml") else "config.toml"
+            st.success(f"✅ TOML Config: {config_file}")
         else:
             st.info("📄 Using Default Config")
         

@@ -1,0 +1,87 @@
+# Environment variables and secrets
+.env
+*.env
+.env.local
+.env.production
+.env.staging
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Vector store databases (regenerate locally)
+vector_store/
+chroma_db/
+*.db
+*.sqlite
+
+# Logs and audit files
+*.log
+logs/
+gov_rag_audit.log
+
+# Large model files (download locally)
+models/
+*.bin
+*.pkl
+*.model
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Data files (add your own data locally)
+data/*.pdf
+data/*.txt
+data/*.csv
+data/*.docx
+!data/README.md
+
+# Build outputs
+build/
+dist/
+*.egg-info/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Pytest
+.pytest_cache/
+.cache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Docker
+.dockerignore
+docker-compose.override.yml

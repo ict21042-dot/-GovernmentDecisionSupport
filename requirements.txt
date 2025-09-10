@@ -9,10 +9,9 @@ langchain-community>=0.0.20
 # Vector store - FAISS instead of Chroma (no SQLite dependency)
 faiss-cpu>=1.7.4
 
-# Embeddings - Multiple options with fallbacks
+# Embeddings - Sentence Transformers (most reliable)
 sentence-transformers>=2.2.0,<3.0.0
 transformers>=4.21.0,<5.0.0
-scikit-learn>=1.0.0
 
 # Document processing
 pypdf>=3.17.0

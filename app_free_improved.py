@@ -248,7 +248,7 @@ def load_documents(data_dir=DATA_DIR) -> List[Document]:
     return docs
 
 def build_vector_store(embedding_choice: str = "multilingual"):
-    """Build vector store with free embeddings"""
+    """Build vector store with free embeddings - FAISS preferred for Streamlit Cloud"""
     docs = load_documents()
     if not docs:
         st.warning("No documents found to build vector store.")
@@ -276,6 +276,38 @@ def build_vector_store(embedding_choice: str = "multilingual"):
     if not embeddings:
         return None, None
     
+    # Try FAISS first for Streamlit Cloud compatibility
+    if FAISS_AVAILABLE:
+        try:
+            model_info = FREE_EMBEDDING_OPTIONS[model_used]
+            
+            # Ensure clean vector store directory
+            if os.path.exists(VECTOR_DIR):
+                import shutil
+                shutil.rmtree(VECTOR_DIR)
+            os.makedirs(VECTOR_DIR, exist_ok=True)
+            
+            with st.spinner(f"Building FAISS vector store with {model_info['name']}..."):
+                vectorstore = FAISS.from_documents(chunks, embeddings)
+                
+                # Try to save FAISS to disk
+                try:
+                    vectorstore.save_local(VECTOR_DIR)
+                    logging.info(f"Built FAISS vector store with {len(chunks)} chunks using {model_used}")
+                    st.success(f"✅ FAISS vector store built with {len(chunks)} chunks")
+                except Exception as save_error:
+                    st.warning(f"⚠️ Could not save FAISS store: {str(save_error)}")
+                    st.info("ℹ️ Using in-memory vector store (will reset on restart)")
+                    logging.info(f"Built in-memory FAISS vector store with {len(chunks)} chunks using {model_used}")
+                    st.success(f"✅ In-memory FAISS vector store built with {len(chunks)} chunks")
+                
+                return vectorstore, model_used
+                
+        except Exception as faiss_error:
+            logging.warning(f"FAISS creation failed: {str(faiss_error)}")
+            st.warning(f"⚠️ FAISS failed: {str(faiss_error)}. Trying Chroma...")
+    
+    # Try Chroma as fallback
     try:
         model_info = FREE_EMBEDDING_OPTIONS[model_used]
         
@@ -285,7 +317,7 @@ def build_vector_store(embedding_choice: str = "multilingual"):
             shutil.rmtree(VECTOR_DIR)
         os.makedirs(VECTOR_DIR, exist_ok=True)
         
-        with st.spinner(f"Building vector store with {model_info['name']}..."):
+        with st.spinner(f"Building Chroma vector store with {model_info['name']}..."):
             # Use the newer Chroma package if available
             if CHROMA_NEW:
                 from langchain_chroma import Chroma
@@ -318,67 +350,31 @@ def build_vector_store(embedding_choice: str = "multilingual"):
         
         # Check if it's a SQLite version issue
         if "sqlite" in str(e).lower() or "3.35.0" in str(e):
-            st.warning("⚠️ SQLite version issue detected. Trying FAISS fallback...")
+            st.error("❌ SQLite version incompatible with Chroma on Streamlit Cloud")
+            st.info("💡 For Streamlit Cloud deployment, please use `streamlit_app.py` which uses FAISS only")
+            st.info("💡 Or install faiss-cpu and the system will use FAISS automatically")
             
-            if FAISS_AVAILABLE:
-                try:
-                    # Use FAISS as fallback
-                    vectorstore = FAISS.from_documents(chunks, embeddings)
-                    
-                    # Try to save FAISS to disk
-                    try:
-                        vectorstore.save_local(VECTOR_DIR)
-                        st.success(f"✅ Vector store built with {len(chunks)} chunks (FAISS)")
-                    except Exception as save_error:
-                        st.warning(f"⚠️ Could not save FAISS store: {str(save_error)}")
-                        st.info("ℹ️ Using in-memory vector store (will reset on restart)")
-                    
-                    logging.info(f"Built FAISS vector store with {len(chunks)} chunks using {model_used}")
-                    return vectorstore, model_used
-                    
-                except Exception as faiss_error:
-                    logging.error(f"FAISS fallback failed: {str(faiss_error)}")
-                    st.error(f"❌ FAISS fallback failed: {str(faiss_error)}")
-                    return None, None
-            else:
-                st.error("❌ FAISS not available. Please install: pip install faiss-cpu")
-                return None, None
-        else:
-            # For other errors, still try FAISS if available
-            if FAISS_AVAILABLE:
-                try:
-                    st.info("🔄 Trying FAISS as fallback...")
-                    vectorstore = FAISS.from_documents(chunks, embeddings)
-                    st.warning("⚠️ Using in-memory FAISS vector store")
-                    return vectorstore, model_used
-                    
-                except Exception as e2:
-                    logging.error(f"All fallback methods failed: {str(e2)}")
-                    st.error(f"❌ All vector store creation methods failed: {str(e2)}")
-                    return None, None
-            else:
-                st.error(f"❌ No fallback available: {str(e)}")
-                return None, None
+        return None, None
 
 def get_vector_store(embedding_choice: str = "multilingual"):
-    """Get existing vector store or build new one"""
+    """Get existing vector store or build new one - FAISS preferred for Streamlit Cloud"""
     try:
         if os.path.exists(VECTOR_DIR) and os.listdir(VECTOR_DIR):
             embeddings, model_used = embedding_manager.get_embedding_model(embedding_choice)
             if embeddings:
+                # Check if it's a FAISS store first (preferred for Streamlit Cloud)
+                faiss_files = [f for f in os.listdir(VECTOR_DIR) if f.endswith('.faiss') or f.endswith('.pkl')]
+                
+                if faiss_files and FAISS_AVAILABLE:
+                    try:
+                        vectorstore = FAISS.load_local(VECTOR_DIR, embeddings, allow_dangerous_deserialization=True)
+                        st.info("✅ Loaded existing FAISS vector store")
+                        return vectorstore, model_used
+                    except Exception as faiss_error:
+                        st.warning(f"⚠️ Could not load FAISS store: {str(faiss_error)}")
+                
+                # Try Chroma if FAISS failed or not available
                 try:
-                    # Check if it's a FAISS store first
-                    faiss_files = [f for f in os.listdir(VECTOR_DIR) if f.endswith('.faiss') or f.endswith('.pkl')]
-                    
-                    if faiss_files and FAISS_AVAILABLE:
-                        try:
-                            vectorstore = FAISS.load_local(VECTOR_DIR, embeddings, allow_dangerous_deserialization=True)
-                            st.info("✅ Loaded existing FAISS vector store")
-                            return vectorstore, model_used
-                        except Exception as faiss_error:
-                            st.warning(f"⚠️ Could not load FAISS store: {str(faiss_error)}")
-                    
-                    # Try Chroma if FAISS failed or not available
                     # Ensure directory is writable
                     os.chmod(VECTOR_DIR, 0o755)
                     
@@ -403,7 +399,7 @@ def get_vector_store(embedding_choice: str = "multilingual"):
                     except Exception as e:
                         if "readonly" in str(e).lower() or "1032" in str(e) or "sqlite" in str(e).lower():
                             logging.warning(f"Vector store has SQLite issues, rebuilding: {str(e)}")
-                            st.info("🔄 Vector store has database issues, rebuilding...")
+                            st.info("🔄 Vector store has database issues, rebuilding with FAISS...")
                             # Remove problematic database and rebuild
                             import shutil
                             shutil.rmtree(VECTOR_DIR)
@@ -412,8 +408,16 @@ def get_vector_store(embedding_choice: str = "multilingual"):
                             raise e
                             
                 except Exception as e:
-                    logging.warning(f"Failed to load existing vector store: {str(e)}")
-                    st.info("🔄 Rebuilding vector store with selected model...")
+                    if "sqlite" in str(e).lower() or "3.35.0" in str(e):
+                        st.error("❌ SQLite compatibility issue detected")
+                        st.info("💡 Rebuilding with FAISS for Streamlit Cloud compatibility...")
+                        # Remove problematic database and rebuild with FAISS
+                        import shutil
+                        shutil.rmtree(VECTOR_DIR)
+                        return build_vector_store(embedding_choice)
+                    else:
+                        logging.warning(f"Failed to load existing vector store: {str(e)}")
+                        st.info("🔄 Rebuilding vector store with selected model...")
         
         # Build new vector store
         return build_vector_store(embedding_choice)

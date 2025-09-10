@@ -18,8 +18,18 @@ try:
     from langchain_chroma import Chroma
     CHROMA_NEW = True
 except ImportError:
-    from langchain_community.vectorstores import Chroma
-    CHROMA_NEW = False
+    try:
+        from langchain_community.vectorstores import Chroma
+        CHROMA_NEW = False
+    except ImportError:
+        CHROMA_NEW = False
+
+# FAISS as fallback for SQLite issues
+try:
+    from langchain_community.vectorstores import FAISS
+    FAISS_AVAILABLE = True
+except ImportError:
+    FAISS_AVAILABLE = False
 
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
@@ -306,23 +316,49 @@ def build_vector_store(embedding_choice: str = "multilingual"):
         logging.error(f"Vector store creation failed: {str(e)}")
         st.error(f"❌ Vector store creation failed: {str(e)}")
         
-        # Try alternative approach with memory-only store
-        try:
-            st.info("🔄 Trying memory-only vector store as fallback...")
-            if CHROMA_NEW:
-                from langchain_chroma import Chroma
-                vectorstore = Chroma.from_documents(chunks, embedding=embeddings)
+        # Check if it's a SQLite version issue
+        if "sqlite" in str(e).lower() or "3.35.0" in str(e):
+            st.warning("⚠️ SQLite version issue detected. Trying FAISS fallback...")
+            
+            if FAISS_AVAILABLE:
+                try:
+                    # Use FAISS as fallback
+                    vectorstore = FAISS.from_documents(chunks, embeddings)
+                    
+                    # Try to save FAISS to disk
+                    try:
+                        vectorstore.save_local(VECTOR_DIR)
+                        st.success(f"✅ Vector store built with {len(chunks)} chunks (FAISS)")
+                    except Exception as save_error:
+                        st.warning(f"⚠️ Could not save FAISS store: {str(save_error)}")
+                        st.info("ℹ️ Using in-memory vector store (will reset on restart)")
+                    
+                    logging.info(f"Built FAISS vector store with {len(chunks)} chunks using {model_used}")
+                    return vectorstore, model_used
+                    
+                except Exception as faiss_error:
+                    logging.error(f"FAISS fallback failed: {str(faiss_error)}")
+                    st.error(f"❌ FAISS fallback failed: {str(faiss_error)}")
+                    return None, None
             else:
-                from langchain_community.vectorstores import Chroma  
-                vectorstore = Chroma.from_documents(chunks, embedding=embeddings)
-            
-            st.warning("⚠️ Using temporary vector store (will reset on restart)")
-            return vectorstore, model_used
-            
-        except Exception as e2:
-            logging.error(f"Fallback vector store creation failed: {str(e2)}")
-            st.error(f"❌ All vector store creation methods failed: {str(e2)}")
-            return None, None
+                st.error("❌ FAISS not available. Please install: pip install faiss-cpu")
+                return None, None
+        else:
+            # For other errors, still try FAISS if available
+            if FAISS_AVAILABLE:
+                try:
+                    st.info("🔄 Trying FAISS as fallback...")
+                    vectorstore = FAISS.from_documents(chunks, embeddings)
+                    st.warning("⚠️ Using in-memory FAISS vector store")
+                    return vectorstore, model_used
+                    
+                except Exception as e2:
+                    logging.error(f"All fallback methods failed: {str(e2)}")
+                    st.error(f"❌ All vector store creation methods failed: {str(e2)}")
+                    return None, None
+            else:
+                st.error(f"❌ No fallback available: {str(e)}")
+                return None, None
 
 def get_vector_store(embedding_choice: str = "multilingual"):
     """Get existing vector store or build new one"""
@@ -331,10 +367,22 @@ def get_vector_store(embedding_choice: str = "multilingual"):
             embeddings, model_used = embedding_manager.get_embedding_model(embedding_choice)
             if embeddings:
                 try:
+                    # Check if it's a FAISS store first
+                    faiss_files = [f for f in os.listdir(VECTOR_DIR) if f.endswith('.faiss') or f.endswith('.pkl')]
+                    
+                    if faiss_files and FAISS_AVAILABLE:
+                        try:
+                            vectorstore = FAISS.load_local(VECTOR_DIR, embeddings, allow_dangerous_deserialization=True)
+                            st.info("✅ Loaded existing FAISS vector store")
+                            return vectorstore, model_used
+                        except Exception as faiss_error:
+                            st.warning(f"⚠️ Could not load FAISS store: {str(faiss_error)}")
+                    
+                    # Try Chroma if FAISS failed or not available
                     # Ensure directory is writable
                     os.chmod(VECTOR_DIR, 0o755)
                     
-                    # Try to load existing vector store
+                    # Try to load existing Chroma vector store
                     if CHROMA_NEW:
                         from langchain_chroma import Chroma
                         vectorstore = Chroma(
@@ -353,10 +401,10 @@ def get_vector_store(embedding_choice: str = "multilingual"):
                         test_query = vectorstore.similarity_search("test", k=1)
                         return vectorstore, model_used
                     except Exception as e:
-                        if "readonly" in str(e).lower() or "1032" in str(e):
-                            logging.warning(f"Vector store is readonly, rebuilding: {str(e)}")
-                            st.info("🔄 Vector store is read-only, rebuilding...")
-                            # Remove readonly database and rebuild
+                        if "readonly" in str(e).lower() or "1032" in str(e) or "sqlite" in str(e).lower():
+                            logging.warning(f"Vector store has SQLite issues, rebuilding: {str(e)}")
+                            st.info("🔄 Vector store has database issues, rebuilding...")
+                            # Remove problematic database and rebuild
                             import shutil
                             shutil.rmtree(VECTOR_DIR)
                             return build_vector_store(embedding_choice)
@@ -490,7 +538,8 @@ def main():
     with col2:
         st.info(f"🔧 **{('New' if HUGGINGFACE_NEW else 'Legacy')} HF Package**")
     with col3:
-        st.info(f"🤖 **Google API**: {'Available' if GOOGLE_AVAILABLE else 'Not Available'}")
+        fallback_status = "FAISS Available" if FAISS_AVAILABLE else "Chroma Only"
+        st.info(f"📊 **Vector Store**: {fallback_status}")
     
     # Sidebar for configuration
     with st.sidebar:

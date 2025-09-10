@@ -1,11 +1,44 @@
-[server]
-headless = true
+# Government RAG System Configuration
+# TOML format configuration file
 
-[theme]
-primaryColor = "#1f77b4"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f0f2f6"
-textColor = "#262730"
+[api]
+# Google Gemini API Configuration
+GOOGLE_API_KEY = "AIzaSyCN5w6UP1wcHg-WfiK3FGWhnL9YMVtcU9M"
 
-[browser]
-gatherUsageStats = false
+[system]
+# System Configuration
+data_dir = "data"
+vector_dir = "vector_store"
+domain = "Local Government Planning and Decision Making"
+
+[embeddings]
+# Default embedding model configuration
+default_model = "multilingual"
+batch_size = 16
+normalize_embeddings = true
+
+[vector_store]
+# Vector store configuration
+chunk_size = 1000
+chunk_overlap = 200
+search_k = 5
+fetch_k = 15
+lambda_mult = 0.7
+
+[llm]
+# Language model configuration
+model = "gemini-2.0-flash"
+temperature = 0.1
+
+[logging]
+# Logging configuration
+level = "INFO"
+audit_file = "gov_rag_audit.log"
+
+[languages]
+# Supported languages
+supported = ["English", "Sinhala", "Tamil"]
+
+[document_types]
+# Supported document types
+supported = ["PDFs", "TXT", "Markdown", "CSV", "Meeting Minutes", "Reports"]

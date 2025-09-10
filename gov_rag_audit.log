@@ -106,3 +106,17 @@ violations {
 2025-09-10 12:13:12,981 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
 2025-09-10 12:13:27,147 - ERROR - Vector store creation failed: Query error: Database error: error returned from database: (code: 1032) attempt to write a readonly database
 2025-09-10 12:13:27,152 - ERROR - Query processing failed: 'NoneType' object has no attribute 'get_relevant_documents'
+2025-09-10 14:04:52,429 - INFO - Loaded 154 documents from data
+2025-09-10 14:05:01,128 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 14:05:12,518 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 14:05:12,554 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-09-10 14:05:26,281 - INFO - Built vector store with 288 chunks using multilingual
+2025-09-10 14:33:06,995 - INFO - Loaded 154 documents from data
+2025-09-10 14:33:43,888 - INFO - Loaded 154 documents from data
+2025-09-10 14:33:50,945 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-09-10 14:33:55,457 - INFO - Loaded free embedding model: 🇺🇸 English Optimized (Free) - Fastest for English
+2025-09-10 14:33:55,712 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-09-10 14:34:07,214 - INFO - Built vector store with 291 chunks using english_optimized
+2025-09-10 14:36:02,099 - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2025-09-10 14:36:08,316 - INFO - Loaded free embedding model: 🌍 Multilingual (Free) - Best for Sinhala, Tamil, English
+2025-09-10 14:36:08,366 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
